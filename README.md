@@ -258,6 +258,8 @@ Output results are exported directly to `output/robustness_report.json`.
 
 ## 🖥️ Interactive Web Dashboard (Phase 9)
 
+🚀 **Live Hugging Face Space Application:** [Candidate Ranking Engine App](https://durgesh1234xyz-candidate-ranking-engine.hf.space/)
+
 An interactive, responsive Streamlit dashboard is provided under `app.py` to wrap the offline recruitment pipeline in a rich graphical interface optimized for 16GB RAM Hugging Face Spaces.
 
 ### ⚙️ Core Dashboard Capabilities
