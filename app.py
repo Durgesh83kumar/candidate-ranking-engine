@@ -278,8 +278,12 @@ def parse_uploaded_resumes(file_paths):
             "java", "c++", "golang", "react", "fastapi", "flask", "django"
         ]
         for w in tech_words:
-            if re.search(rf"\b{w}\b", text.lower()):
-                skills.append(w)
+            if "+" in w or "-" in w or "." in w:
+                if w in text.lower():
+                    skills.append(w)
+            else:
+                if re.search(rf"\b{w}\b", text.lower()):
+                    skills.append(w)
                 
         # Discover experience years dynamically
         years_exp = extract_experience_years(text)
