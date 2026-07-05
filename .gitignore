@@ -1,0 +1,40 @@
+# Python virtual environments
+venv/
+.venv/
+env/
+.env
+ENV/
+
+# Python compiled bytecodes & PyTest caches
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Ignore all data inputs
+data/
+candidates.jsonl
+job_description.docx
+job_description.pdf
+
+# Exclude large binary formats
+*.index
+*.npy
+*.parquet
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# ---------------------------------------------------
+# OUTPUT DIRECTORY HANDLING (CORRECTED)
+# ---------------------------------------------------
+# Ignore everything inside the output folder
+output/*
+
+# EXCEPTIONS: Force Git to track our final deliverables
+!output/submission.csv
+!output/robustness_report.json
+
+temp_uploads/

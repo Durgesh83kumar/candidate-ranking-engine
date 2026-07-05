@@ -1,0 +1,61 @@
+{
+  "timestamp": "2026-07-02 00:09:21",
+  "weight_sensitivity_analysis": {
+    "retrieval_up": {
+      "top_100_overlap_count": 59,
+      "spearman_rank_correlation": 0.965,
+      "weights": {
+        "retrieval": 0.22,
+        "cross_encoder": 0.38,
+        "career": 0.25,
+        "profile": 0.15
+      }
+    },
+    "retrieval_down": {
+      "top_100_overlap_count": 59,
+      "spearman_rank_correlation": 0.9771,
+      "weights": {
+        "retrieval": 0.18,
+        "cross_encoder": 0.42,
+        "career": 0.25,
+        "profile": 0.15
+      }
+    },
+    "cross_encoder_up": {
+      "top_100_overlap_count": 58,
+      "spearman_rank_correlation": 0.9773,
+      "weights": {
+        "retrieval": 0.2,
+        "cross_encoder": 0.42,
+        "career": 0.23,
+        "profile": 0.15
+      }
+    },
+    "career_up": {
+      "top_100_overlap_count": 58,
+      "spearman_rank_correlation": 0.9763,
+      "weights": {
+        "retrieval": 0.2,
+        "cross_encoder": 0.4,
+        "career": 0.27,
+        "profile": 0.13
+      }
+    }
+  },
+  "verification_regex_pass_rates": {
+    "total_test_cases": 8,
+    "passed_cases": 8,
+    "pass_rate": 1.0,
+    "failures": []
+  },
+  "jd_cross_validation": {
+    "status": "success",
+    "mock_jd": "Senior Data Engineer",
+    "score_distribution": {
+      "mean": 0.0631,
+      "max": 0.75,
+      "std": 0.118
+    },
+    "interpretation": "Search completed without crash. Scores follow normal distribution variance."
+  }
+}
