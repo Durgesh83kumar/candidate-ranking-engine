@@ -14,6 +14,19 @@ temp_uploads/
 .agents/
 .gemini/
 tests/
-output/faiss.index
-output/*.parquet
-output/*.npy
+# Exclude transient output files but keep database files
+output/final_ranked_candidates.parquet
+output/retrieval_candidates.parquet
+output/reranked_candidates.parquet
+output/ranking_features.parquet
+output/reranker_features.parquet
+output/ranking_features.parquet
+output/reranker_features.parquet
+output/reranker_scores.json
+output/reranker_statistics.json
+output/reranker_benchmark.json
+output/ranking_statistics.json
+output/candidate_reasoning.json
+output/honeypot_analysis.json
+output/ranking_explanation.json
+output/ranking_benchmark.json

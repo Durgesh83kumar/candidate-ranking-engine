@@ -13,7 +13,21 @@ from pypdf import PdfReader
 
 # Add local root to sys.path
 import sys
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from pathlib import Path
+ROOT = Path(__file__).resolve().parent
+sys.path.insert(0, str(ROOT))
+
+# Create temporary upload directory relative to project root
+TEMP_DIR = str(ROOT / "temp_uploads")
+os.makedirs(TEMP_DIR, exist_ok=True)
+
+# Define absolute paths based on project root to be safe from working directory variations
+local_index_path = str(ROOT / "output" / "faiss.index")
+local_metadata_path = str(ROOT / "output" / "processed_candidates.parquet")
+local_search_docs_path = str(ROOT / "output" / "search_documents.parquet")
+hiring_specification_path = str(ROOT / "output" / "hiring_specification.json")
+search_queries_path = str(ROOT / "output" / "search_queries.json")
+index_metadata_path = str(ROOT / "output" / "index_metadata.json")
 
 # Backend imports
 from src.preprocessing.pipeline import PreprocessingPipeline
@@ -33,9 +47,6 @@ from src.verification.calibrator import ScoreCalibrator
 from src.verification.config import VerificationConfig
 from src.verification.cli import validate_and_save_submission
 
-# Create temporary upload directory
-TEMP_DIR = os.path.join(os.getcwd(), "temp_uploads")
-os.makedirs(TEMP_DIR, exist_ok=True)
 
 # ---------------------------------------------------------
 # ST PAGE CONFIG & RICH AESTHETICS STYLE
@@ -366,10 +377,55 @@ if "search_queries" not in st.session_state:
 if "metadata_db" not in st.session_state:
     st.session_state.metadata_db = None
 
-# Local data verification check
-local_index_path = "output/faiss.index"
-local_metadata_path = "output/processed_candidates.parquet"
-local_search_docs_path = "output/search_documents.parquet"
+# ---------------------------------------------------------
+# DEPLOYMENT DIAGNOSTICS & VERIFICATION CHECKLIST (CHECKLIST 3 & 8)
+# ---------------------------------------------------------
+output_dir = ROOT / "output"
+output_exists = output_dir.exists()
+output_contents = os.listdir(str(output_dir)) if output_exists else []
+
+# Compute checklist items
+chk_output_exists = output_exists
+chk_faiss_exists = os.path.exists(local_index_path)
+chk_metadata_exists = os.path.exists(local_metadata_path)
+chk_search_docs_exists = os.path.exists(local_search_docs_path)
+chk_index_meta_exists = os.path.exists(index_metadata_path)
+
+# 1. Print diagnostics to container logs (stdout)
+print("=== DEPLOYMENT STARTUP DIAGNOSTICS ===", flush=True)
+print(f"Current Working Directory (CWD): {os.getcwd()}", flush=True)
+print(f"Application Root Path: {ROOT}", flush=True)
+print(f"Output Directory Exists: {chk_output_exists}", flush=True)
+print(f"Output Directory Contents: {output_contents}", flush=True)
+print(f"Absolute Path Checked for faiss.index: {local_index_path} (Exists: {chk_faiss_exists})", flush=True)
+print(f"Absolute Path Checked for processed_candidates.parquet: {local_metadata_path} (Exists: {chk_metadata_exists})", flush=True)
+print(f"Absolute Path Checked for search_documents.parquet: {local_search_docs_path} (Exists: {chk_search_docs_exists})", flush=True)
+print(f"Absolute Path Checked for index_metadata.json: {index_metadata_path} (Exists: {chk_index_meta_exists})", flush=True)
+print("======================================", flush=True)
+
+# 2. Render diagnostics and checklist in Streamlit Sidebar
+with st.sidebar:
+    st.markdown("---")
+    with st.expander("🔍 Deployment Verification Checklist", expanded=True):
+        st.markdown("### Verification Status")
+        
+        def render_status(label, passed):
+            if passed:
+                st.markdown(f"**✓ {label}**: :green[PASS]")
+            else:
+                st.markdown(f"**✗ {label}**: :red[FAIL]")
+                
+        render_status("output directory exists", chk_output_exists)
+        render_status("faiss.index exists", chk_faiss_exists)
+        render_status("processed_candidates.parquet exists", chk_metadata_exists)
+        render_status("search_documents.parquet exists", chk_search_docs_exists)
+        render_status("index_metadata.json exists", chk_index_meta_exists)
+        
+        st.markdown("---")
+        st.markdown("**Diagnostics Data:**")
+        st.caption(f"**CWD:** `{os.getcwd()}`")
+        st.caption(f"**App Root:** `{ROOT}`")
+        st.caption(f"**Output Files:** `{output_contents}`")
 
 # Pre-load local metadata DB if mode requires it
 if st.session_state.metadata_db is None and os.path.exists(local_metadata_path):
@@ -431,9 +487,15 @@ with tab1:
             st.stop()
             
         # Check files requirements
+        # Check files requirements
         if mode == "Search 100K Candidate Database":
             if not os.path.exists(local_index_path) or not os.path.exists(local_metadata_path) or not os.path.exists(local_search_docs_path):
-                st.error("Missing local vector database files in 'output/'. Check system settings and ensure indexing has completed.")
+                st.error(f"Missing local vector database files in 'output/'.\n"
+                         f"Checked Absolute Paths:\n"
+                         f"- FAISS Index: {local_index_path} (Exists: {os.path.exists(local_index_path)})\n"
+                         f"- Metadata Parquet: {local_metadata_path} (Exists: {os.path.exists(local_metadata_path)})\n"
+                         f"- Search Docs Parquet: {local_search_docs_path} (Exists: {os.path.exists(local_search_docs_path)})\n"
+                         f"Please ensure indexing and preprocessing runs successfully locally before uploading output files.")
                 st.stop()
         else:
             if not resumes_uploaded:
@@ -458,10 +520,10 @@ with tab1:
                 queries = query_gen.generate(spec)
                 
                 # Save parsed deliverables to output folder
-                os.makedirs("output", exist_ok=True)
-                with open("output/hiring_specification.json", "w", encoding="utf-8") as f:
+                os.makedirs(str(ROOT / "output"), exist_ok=True)
+                with open(hiring_specification_path, "w", encoding="utf-8") as f:
                     json.dump(spec.model_dump(), f, indent=2)
-                with open("output/search_queries.json", "w", encoding="utf-8") as f:
+                with open(search_queries_path, "w", encoding="utf-8") as f:
                     json.dump(queries, f, indent=2)
                 
                 st.session_state.hiring_spec = spec
@@ -502,10 +564,10 @@ with tab1:
                 
                 retriever = SemanticRetriever(
                     config=retrieval_config,
-                    spec_path="output/hiring_specification.json",
-                    queries_path="output/search_queries.json",
+                    spec_path=hiring_specification_path,
+                    queries_path=search_queries_path,
                     index_path=local_index_path,
-                    index_metadata_path="output/index_metadata.json",
+                    index_metadata_path=index_metadata_path,
                     candidates_parquet_path=local_metadata_path
                 )
                 
@@ -529,7 +591,7 @@ with tab1:
                     batch_size=32,
                     device="cpu"
                 )
-                pair_builder = RerankingPairBuilder(spec_path="output/hiring_specification.json")
+                pair_builder = RerankingPairBuilder(spec_path=hiring_specification_path)
                 scorer = BatchRerankingScorer(config=reranker_config)
                 scorer.model = ce_backend # Bind cached CrossEncoder instance
                 
@@ -635,7 +697,7 @@ with tab1:
                 # Step 5: Verification & Calibration (Phase 8)
                 status.update(label="Phase 8: Calibrating multipliers and verifying mandatory requirements...")
                 ver_config = VerificationConfig()
-                calibrator = ScoreCalibrator(config=ver_config, spec_path="output/hiring_specification.json")
+                calibrator = ScoreCalibrator(config=ver_config, spec_path=hiring_specification_path)
                 
                 calibrated_list = []
                 for s in scored_list:
@@ -707,7 +769,7 @@ with tab1:
                     
                     # Run calibration directly
                     ver_config = VerificationConfig()
-                    calibrator = ScoreCalibrator(config=ver_config, spec_path="output/hiring_specification.json")
+                    calibrator = ScoreCalibrator(config=ver_config, spec_path=hiring_specification_path)
                     res = calibrator.calibrate_candidate(pc)
                     pc.update(res)
                     scored_list.append(pc)
