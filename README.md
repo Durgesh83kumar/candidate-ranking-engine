@@ -1,3 +1,13 @@
+---
+title: Candidate Ranking Engine
+emoji: 🚀
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+app_port: 7860
+pinned: false
+---
+
 # Intelligent Candidate Discovery & Ranking System
 
 An offline, CPU-optimized, production-grade search and ranking pipeline built for large-scale information retrieval, semantic matching, and deterministic candidate verification. 

@@ -32,7 +32,7 @@ RUN pip install --no-cache-dir --upgrade -r requirements.txt
 # Copy all application source files
 COPY --chown=user . .
 
-# Create the output directory (if not exists) and grant permissions
+# Create the output directory inside the user home working directory
 RUN mkdir -p output
 
 # Expose port 7860 (Hugging Face default)
